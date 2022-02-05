@@ -1,13 +1,14 @@
 <mat-card>
-    <form (submit)="onAddPost(postForm)" #postForm='ngForm'>
+    <mat-spinner *ngIf="isLoading"></mat-spinner>
+    <form (submit)="onSavePost(postForm)" #postForm='ngForm' *ngIf="!isLoading">
         <mat-form-field>
-            <input matInput type="text" name="title" placeholder="post title" ngModel required minlength="4"
-                #title='ngModel'>
+            <input matInput type="text" name="title" placeholder="post title" [ngModel]='post?.title' required
+                minlength="4" #title='ngModel'>
             <mat-error *ngIf="title.invalid">Title must contain at least 4 characters.</mat-error>
         </mat-form-field>
         <mat-form-field>
-            <textarea matInput cols="6" name="content" placeholder="post content" ngModel required minlength="7"
-                #content='ngModel'></textarea>
+            <textarea matInput cols="6" name="content" placeholder="post content" [ngModel]='post?.content' required
+                minlength="7" #content='ngModel'></textarea>
             <mat-error *ngIf="content.invalid">Your post must contain at least 7 characters.</mat-error>
         </mat-form-field>
         <button type="submit" mat-raised-button color="accent">

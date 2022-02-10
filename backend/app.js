@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path')
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 
@@ -6,7 +7,7 @@ const postsRoutes = require('./routes/posts-routes');
 
 const app = express();
 
-mongoose.connect('mongodb+srv://password@cluster0.cn8hp.mongodb.net/name?retryWrites=true&w=majority')
+mongoose.connect('mongodb+srv://..........@cluster0.cn8hp.mongodb.net/.........?retryWrites=true&w=majority')
     .then(() => {
         console.log('mongoDB connected');
     })
@@ -16,6 +17,8 @@ mongoose.connect('mongodb+srv://password@cluster0.cn8hp.mongodb.net/name?retryWr
 
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: false }));
+
+app.use('/images', express.static(path.join('backend/images')));
 
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');

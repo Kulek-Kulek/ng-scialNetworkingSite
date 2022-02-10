@@ -2,17 +2,37 @@ const Post = require('../models/post');
 
 
 const getPosts = async (req, res, next) => {
+    const pageSize = +req.query.pagesize;
+    const currentPage = +req.query.page;
+    let postQuery = Post.find();
+
+    if (pageSize && currentPage) {
+        postQuery = postQuery
+            .skip(pageSize * (currentPage - 1))
+            .limit((pageSize))
+    }
+
     let posts;
     try {
-        posts = await Post.find();
+        posts = await postQuery;
     }
     catch {
         console.log('error get');
     }
+    let postsNumber;
+    try {
+        postsNumber = await Post.count();
+    }
+    catch {
+        console.log('error count');
+    }
+
+    console.log(postsNumber);
 
     res.status(200).json({
         message: 'posts fetched',
-        posts
+        posts,
+        maxPosts: postsNumber
     });
 }
 
@@ -40,14 +60,17 @@ const getOnePost = async (req, res, next) => {
 
 
 const addPosts = async (req, res, next) => {
-    const { title, content } = req.body.post;
+    const url = req.protocol + '://' + req.get('host');
+    const imagePath = url + '/images/' + req.file.filename;
+    const { title, content } = req.body;
 
     let post;
 
     try {
         post = await new Post({
             title,
-            content
+            content,
+            imagePath
         });
     }
     catch {
@@ -56,21 +79,34 @@ const addPosts = async (req, res, next) => {
 
     post.save()
         .then(createdPost => {
-            res.status(201).json({ message: 'Posts added', postId: createdPost._id });
+            res.status(201).json({
+                message: 'Posts added', post: {
+                    id: createdPost._id,
+                    title: createdPost.title,
+                    content: createdPost.content
+                }
+            });
         });
 }
 
 const updatePost = async (req, res, next) => {
+    let imagePath = req.body.imagePath;
+    if (req.file) {
+        const url = req.protocol + '://' + req.get('host');
+        imagePath = url + '/images/' + req.file.filename;
+    }
+
     const { title, content } = req.body;
     const id = req.params.id;
     const updatingPost = new Post({
         _id: id,
         title,
-        content
+        content,
+        imagePath
     });
 
     try {
-        Post.updateOne({ _id: id }, updatingPost);
+        await Post.updateOne({ _id: id }, updatingPost);
     }
     catch {
         console.log(err);
